@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e6e6e">
+<title>StundenCheck – 30 Sekunden, passende Anpassungen</title>
+<meta name="description" content="Vor der Stunde in 30 Sekunden antippen, was heute los ist – die App schlägt passende Unterrichtsanpassungen vor. Keine Diagnostik, adaptive Unterrichtsplanung.">
+<style>
+:root{
+  --bg:#f2f4f3; --card:#ffffff; --ink:#1c2a2a; --ink2:#5a6b6a; --line:#dde4e2;
+  --accent:#0e6e6e; --accent-soft:#e0efee; --accent-ink:#0a5252;
+  --amber:#b9791a; --amber-soft:#f8edd9;
+  --danger:#a63d2f;
+  --radius:14px; --shadow:0 1px 3px rgba(20,40,40,.07), 0 4px 14px rgba(20,40,40,.05);
+  --serif:"Iowan Old Style","Charter","Georgia",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141b1a; --card:#1e2726; --ink:#e7edec; --ink2:#93a3a1; --line:#2d3a38;
+    --accent:#4db3ab; --accent-soft:#173432; --accent-ink:#7fd0c9;
+    --amber:#dfa242; --amber-soft:#33290f;
+    --danger:#e07a6b;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{
+  margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  line-height:1.45; min-height:100dvh;
+}
+.wrap{max-width:660px; margin:0 auto; padding:0 16px 110px}
+header.app{
+  position:sticky; top:0; z-index:20; background:var(--bg);
+  border-bottom:1px solid var(--line);
+  padding:10px 0 8px; margin:0 -16px 14px; padding-left:16px; padding-right:16px;
+  display:flex; align-items:center; gap:10px;
+}
+.brand{font-family:var(--serif); font-weight:700; font-size:1.25rem; letter-spacing:.2px; margin-right:auto; cursor:pointer}
+.brand small{display:block; font-family:var(--sans); font-weight:400; font-size:.68rem; color:var(--ink2); letter-spacing:.4px}
+.pill{
+  border:1px solid var(--line); background:var(--card); color:var(--ink);
+  border-radius:999px; padding:6px 12px; font-size:.82rem; cursor:pointer; font-family:var(--sans);
+  white-space:nowrap;
+}
+.pill.accent{background:var(--accent-soft); border-color:transparent; color:var(--accent-ink); font-weight:600}
+.iconbtn{border:none; background:transparent; font-size:1.25rem; cursor:pointer; padding:6px; border-radius:10px; color:var(--ink)}
+.iconbtn:hover{background:var(--accent-soft)}
+
+h1.lead{font-family:var(--serif); font-size:1.5rem; line-height:1.25; margin:6px 0 4px}
+p.sub{color:var(--ink2); margin:0 0 18px; font-size:.95rem}
+
+.catlabel{
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; color:var(--ink2);
+  margin:20px 0 8px; font-weight:600;
+}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+button.chip{
+  font-family:var(--sans); font-size:.92rem; color:var(--ink);
+  background:var(--card); border:1.5px solid var(--line); border-radius:999px;
+  padding:9px 14px; cursor:pointer; transition:transform .06s ease, background .12s, border-color .12s;
+  box-shadow:var(--shadow);
+}
+button.chip:active{transform:scale(.96)}
+button.chip[aria-pressed="true"]{
+  background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;
+}
+button.chip .e{margin-right:6px}
+button.chip.custom[aria-pressed="true"]{background:var(--amber); border-color:var(--amber)}
+
+.bottombar{
+  position:fixed; left:0; right:0; bottom:0; z-index:30;
+  background:linear-gradient(to top, var(--bg) 70%, transparent);
+  padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+.bottombar .inner{max-width:660px; margin:0 auto; display:flex; gap:10px; align-items:center}
+.count{font-size:.85rem; color:var(--ink2); min-width:86px}
+button.primary{
+  flex:1; font-family:var(--sans); font-size:1.02rem; font-weight:650; letter-spacing:.2px;
+  background:var(--accent); color:#fff; border:none; border-radius:var(--radius);
+  padding:15px 18px; cursor:pointer; box-shadow:var(--shadow);
+}
+button.primary:disabled{opacity:.45; cursor:default}
+button.secondary{
+  font-family:var(--sans); font-size:.92rem; background:var(--card); color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--radius); padding:11px 14px; cursor:pointer;
+}
+button.secondary.small{padding:8px 12px; font-size:.85rem; border-radius:10px}
+
+/* Results */
+.rescat{margin:22px 0 8px; display:flex; align-items:center; gap:8px}
+.rescat .dot{width:9px; height:9px; border-radius:50%; background:var(--accent)}
+.rescat h3{font-family:var(--serif); font-size:1.05rem; margin:0}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:14px 14px 12px; margin-bottom:10px; cursor:pointer;
+  transition:border-color .12s;
+}
+.card .t{font-size:.98rem; font-weight:520}
+.card .why{font-size:.8rem; color:var(--ink2); margin-top:6px}
+.card .why b{color:var(--accent-ink); font-weight:600}
+.card.checked{border-color:var(--accent)}
+.card.checked .t{color:var(--accent-ink)}
+.card.checked .t::before{content:"✓ "; font-weight:700}
+.card.ai{border-left:4px solid var(--amber)}
+.summary{
+  background:var(--accent-soft); border-radius:var(--radius); padding:12px 14px;
+  font-size:.88rem; color:var(--accent-ink); margin-bottom:6px;
+}
+.actionrow{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0}
+.note{font-size:.8rem; color:var(--ink2)}
+.morebtn{width:100%; margin-top:4px}
+
+/* Settings / panels */
+section.panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; margin-bottom:14px}
+section.panel h3{font-family:var(--serif); margin:0 0 10px; font-size:1.08rem}
+label.f{display:block; font-size:.85rem; color:var(--ink2); margin:12px 0 4px}
+input[type=text],input[type=password],input[type=number],textarea{
+  width:100%; font-family:var(--sans); font-size:.95rem; color:var(--ink);
+  background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+}
+textarea{resize:vertical; min-height:70px}
+input[type=range]{width:100%; accent-color:var(--accent)}
+.gradeval{font-family:var(--serif); font-size:1.35rem; font-weight:700; color:var(--accent-ink)}
+.hint{font-size:.78rem; color:var(--ink2); margin-top:6px}
+.hint.warn{color:var(--amber)}
+.customitem{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:.92rem}
+.customitem:last-child{border-bottom:none}
+.customitem .x{margin-left:auto; color:var(--danger); background:none; border:none; cursor:pointer; font-size:1rem}
+.histitem{padding:12px 0; border-bottom:1px solid var(--line)}
+.histitem:last-child{border-bottom:none}
+.histitem .d{font-size:.8rem; color:var(--ink2)}
+.histitem .fx{font-size:.92rem; margin:4px 0}
+.histitem details{margin-top:4px}
+.histitem summary{font-size:.82rem; color:var(--accent-ink); cursor:pointer}
+.histitem ul{margin:6px 0 0; padding-left:18px; font-size:.86rem}
+.spin{display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; vertical-align:-2px; margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{
+  position:fixed; bottom:100px; left:50%; transform:translateX(-50%); z-index:50;
+  background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:999px;
+  font-size:.88rem; opacity:0; pointer-events:none; transition:opacity .25s;
+}
+.toast.show{opacity:.95}
+.back{color:var(--accent-ink); background:none; border:none; font-size:.92rem; cursor:pointer; padding:6px 0; margin:4px 0 8px; font-weight:600}
+.disclaimer{font-size:.75rem; color:var(--ink2); text-align:center; margin-top:26px; line-height:1.5}
+[hidden]{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="app">
+    <div class="brand" onclick="show('checkin')">StundenCheck<small>adaptive Unterrichtsplanung · keine Diagnostik</small></div>
+    <button class="pill accent" id="gradePill" onclick="show('settings')" title="Klassenstufe ändern">Kl. 3</button>
+    <button class="iconbtn" onclick="show('history')" title="Verlauf" aria-label="Verlauf">🕘</button>
+    <button class="iconbtn" onclick="show('settings')" title="Einstellungen" aria-label="Einstellungen">⚙️</button>
+  </header>
+
+  <!-- ============ CHECK-IN ============ -->
+  <main id="view-checkin">
+    <h1 class="lead">Was ist heute los?</h1>
+    <p class="sub">Tippe an, was auf deine Lerngruppe zutrifft – der Rest dauert keine 30 Sekunden.</p>
+    <div id="factorArea"></div>
+    <div class="disclaimer">StundenCheck stellt keine Diagnosen und ersetzt keine pädagogische Entscheidung.<br>Es macht Vorschläge – du kennst deine Klasse.</div>
+  </main>
+
+  <!-- ============ RESULTS ============ -->
+  <main id="view-results" hidden>
+    <button class="back" onclick="show('checkin')">← zurück zum Check</button>
+    <h1 class="lead">Vorschläge für diese Stunde</h1>
+    <div class="summary" id="resSummary"></div>
+    <p class="note">Tippe an, was du übernehmen willst – das landet im Verlauf.</p>
+    <div id="resArea"></div>
+    <button class="secondary morebtn" id="moreBtn" hidden onclick="toggleMore()">Weitere Vorschläge anzeigen</button>
+
+    <div id="aiSection">
+      <div class="rescat" id="aiHead" hidden><span class="dot" style="background:var(--amber)"></span><h3>KI-Vorschläge</h3></div>
+      <div id="aiArea"></div>
+      <div class="actionrow">
+        <button class="secondary" id="aiBtn" onclick="aiRefine()">✨ Mit KI verfeinern</button>
+      </div>
+      <p class="note" id="aiNote"></p>
+    </div>
+
+    <div class="actionrow">
+      <button class="secondary" onclick="copyResults()">📋 Kopieren</button>
+      <button class="secondary" onclick="resetCheckin()">↺ Neuer Check</button>
+    </div>
+  </main>
+
+  <!-- ============ HISTORY ============ -->
+  <main id="view-history" hidden>
+    <button class="back" onclick="show('checkin')">← zurück</button>
+    <h1 class="lead">Verlauf</h1>
+    <p class="sub">Deine letzten Checks – nur auf diesem Gerät gespeichert.</p>
+    <section class="panel"><div id="histArea"></div></section>
+    <div class="actionrow">
+      <button class="secondary" onclick="exportData()">⬇️ Daten exportieren (JSON)</button>
+      <button class="secondary" onclick="clearHistory()" style="color:var(--danger)">Verlauf löschen</button>
+    </div>
+  </main>
+
+  <!-- ============ SETTINGS ============ -->
+  <main id="view-settings" hidden>
+    <button class="back" onclick="show('checkin')">← zurück</button>
+    <h1 class="lead">Einstellungen</h1>
+
+    <section class="panel">
+      <h3>Klassenstufe</h3>
+      <p class="note">Die Vorschläge passen sich der Stufe an – jederzeit änderbar.</p>
+      <div style="display:flex; align-items:center; gap:14px; margin-top:8px">
+        <input type="range" min="1" max="13" step="1" id="gradeRange" oninput="setGrade(this.value)">
+        <span class="gradeval" id="gradeVal">3</span>
+      </div>
+      <p class="hint" id="gradeBandHint"></p>
+    </section>
+
+    <section class="panel">
+      <h3>Eigene Faktoren</h3>
+      <p class="note">Was kommt bei dir oft vor, fehlt aber in der Liste? Lege es an – optional mit eigenen Vorschlägen.</p>
+      <div id="customList"></div>
+      <label class="f">Faktor (z.&nbsp;B. „Hitzetag“, „Wandertag morgen“)</label>
+      <input type="text" id="cfLabel" maxlength="60" placeholder="Bezeichnung">
+      <label class="f">Eigene Vorschläge dazu (eine Zeile = ein Vorschlag, optional)</label>
+      <textarea id="cfSugg" placeholder="z. B. Trinkpausen einbauen&#10;Schattenplätze / Raum lüften"></textarea>
+      <div class="actionrow" style="margin-bottom:0">
+        <button class="secondary" onclick="addCustomFactor()">+ Faktor hinzufügen</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>KI-Verfeinerung (optional)</h3>
+      <p class="note">Die App funktioniert komplett ohne KI und ohne Internet. Mit einem eigenen Anthropic-API-Key kann Claude die Vorschläge zusätzlich auf deine konkrete Situation zuschneiden.</p>
+      <label class="f">Anthropic API-Key</label>
+      <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off">
+      <div class="actionrow" style="margin-bottom:0">
+        <button class="secondary small" onclick="saveKey()">Speichern</button>
+        <button class="secondary small" onclick="deleteKey()">Key löschen</button>
+      </div>
+      <p class="hint warn">Der Key wird nur lokal auf diesem Gerät gespeichert. Bei Nutzung werden die angetippten Faktoren (keine Namen!) an Anthropic (USA) gesendet. Bitte niemals Namen oder Daten einzelner Kinder eingeben.</p>
+    </section>
+
+    <section class="panel">
+      <h3>Daten</h3>
+      <p class="note">Alles liegt ausschließlich im Speicher deines Browsers (localStorage). Kein Konto, kein Server, kein Tracking.</p>
+      <div class="actionrow" style="margin-bottom:0">
+        <button class="secondary" onclick="exportData()">⬇️ Exportieren</button>
+        <button class="secondary" onclick="wipeAll()" style="color:var(--danger)">Alles löschen</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Über StundenCheck</h3>
+      <p class="note">Ein 30-Sekunden-Check vor der Stunde: Tagesform der Lerngruppe antippen, didaktisch begründete Anpassungsvorschläge erhalten. Keine Diagnostik – adaptive Unterrichtsplanung. Die Vorschläge sind Impulse, keine Vorschriften.</p>
+    </section>
+  </main>
+
+</div>
+
+<div class="bottombar" id="bottombar">
+  <div class="inner">
+    <span class="count" id="selCount">0 ausgewählt</span>
+    <button class="primary" id="goBtn" disabled onclick="generate()">Vorschläge anzeigen →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================================================================
+   StundenCheck – regelbasierter Kern
+   ================================================================ */
+
+const CATS = [
+  ["klasse","Die Klasse heute"],
+  ["kinder","Einzelne Kinder"],
+  ["lernen","Lernvoraussetzungen"],
+  ["rahmen","Rahmenbedingungen"],
+  ["plan","Für diese Stunde geplant"],
+  ["eigene","Eigene Faktoren"],
+];
+
+const FACTORS = [
+  {id:"unruhig",       cat:"klasse", e:"🌀", l:"Sehr unruhig"},
+  {id:"muede",         cat:"klasse", e:"🥱", l:"Müde & schlapp"},
+  {id:"aufgedreht",    cat:"klasse", e:"🎉", l:"Aufgedreht (z. B. vor Ferien)"},
+  {id:"angespannt",    cat:"klasse", e:"😟", l:"Angespannt / nervös"},
+  {id:"konflikt",      cat:"klasse", e:"⚡", l:"Konflikt in der Klasse"},
+  {id:"motiviert",     cat:"klasse", e:"🚀", l:"Richtig motiviert"},
+
+  {id:"krank",         cat:"kinder", e:"🤒", l:"Mehrere Kinder krank / fehlen"},
+  {id:"schlaf",        cat:"kinder", e:"😴", l:"Kinder mit wenig Schlaf"},
+  {id:"belastung",     cat:"kinder", e:"💙", l:"Kind mit akuter Belastung"},
+  {id:"neu",           cat:"kinder", e:"👋", l:"Neues Kind in der Klasse"},
+
+  {id:"sprache",       cat:"lernen", e:"🗣️", l:"Sprachbarrieren"},
+  {id:"lesen",         cat:"lernen", e:"📖", l:"Förderbedarf Lesen"},
+  {id:"mathe",         cat:"lernen", e:"🔢", l:"Förderbedarf Mathe"},
+  {id:"konzentration", cat:"lernen", e:"🎯", l:"Konzentration schwierig"},
+  {id:"heterogen",     cat:"lernen", e:"🌈", l:"Sehr unterschiedliches Niveau"},
+
+  {id:"praktikantin",  cat:"rahmen", e:"🧑‍🏫", l:"Praktikant*in / 2. Person dabei"},
+  {id:"vertretung",    cat:"rahmen", e:"🔄", l:"Vertretungsstunde"},
+  {id:"randstunde",    cat:"rahmen", e:"🕐", l:"Erste / letzte Stunde"},
+  {id:"nachsport",     cat:"rahmen", e:"⚽", l:"Direkt nach Sport / Pause"},
+  {id:"technik",       cat:"rahmen", e:"📵", l:"Technik unsicher"},
+  {id:"kurz",          cat:"rahmen", e:"⏳", l:"Verkürzte Stunde / Zeitdruck"},
+
+  {id:"p_gruppe",      cat:"plan", e:"👥", l:"Gruppenarbeit geplant"},
+  {id:"p_neu",         cat:"plan", e:"✨", l:"Neuer Stoff geplant"},
+  {id:"p_test",        cat:"plan", e:"📝", l:"Test / Abfrage geplant"},
+];
+
+const SCATS = [
+  ["sozial","Sozialform"],
+  ["aufgabe","Aufgaben & Struktur"],
+  ["material","Material & Medien"],
+  ["rhythmus","Rhythmus & Bewegung"],
+  ["klima","Klima & Kommunikation"],
+  ["orga","Organisation"],
+  ["eigene","Deine eigenen Vorschläge"],
+];
+
+/* Vorschläge. t = Standardtext, gs/sek1/sek2 = stufenspezifische Varianten */
+const SUGG = {
+  // Sozialform
+  s_partner:        {cat:"sozial", t:"Partnerarbeit statt Gruppenarbeit – kleinere Einheiten, weniger Reibung"},
+  s_einzel_start:   {cat:"sozial", t:"Mit stiller Einzelarbeit starten, erst danach öffnen"},
+  s_tandem_lesen:   {cat:"sozial", gs:"Lese-Tandems bilden: ein lesestarkes Kind liest mit", t:"Texte im Tandem erschließen (abwechselnd lesen & zusammenfassen)"},
+  s_sprachvorbild:  {cat:"sozial", t:"Tandems bewusst zusammensetzen: Partner*in als sprachliches Vorbild"},
+  s_helfer:         {cat:"sozial", gs:"Helferkinder benennen: Wer fertig ist, hilft am Helfertisch", t:"Helfersystem nutzen: Expert*innen als Ansprechpartner benennen"},
+  s_rollen:         {cat:"sozial", t:"Kooperation mit klaren Rollen (Zeitwächter*in, Schreiber*in, Präsentator*in) statt offener Gruppenarbeit"},
+
+  // Aufgaben & Struktur
+  s_geschlossen:    {cat:"aufgabe", t:"Weniger offene Arbeitsaufträge: kleinschrittig und klar formulieren"},
+  s_einzelschritte: {cat:"aufgabe", t:"Aufträge einzeln nacheinander geben statt alle auf einmal"},
+  s_gestuft:        {cat:"aufgabe", t:"Gestufte Aufgaben anbieten (Basis + Plus) – alle starten mit einem Erfolg"},
+  s_wahl:           {cat:"aufgabe", t:"Offenere Formate oder Wahlaufgaben – die Motivation trägt heute"},
+  s_kernziel:       {cat:"aufgabe", t:"Ein Kernziel festlegen – alles andere streichen oder verschieben"},
+  s_kein_neustoff:  {cat:"aufgabe", t:"Keinen neuen Kernstoff einführen – üben, vertiefen, wiederholen"},
+  s_neustoff_strukturiert:{cat:"aufgabe", t:"Neuen Stoff nur stark strukturiert einführen: Vorwissen aktivieren, kleine Schritte, viel Vormachen"},
+  s_sprachentlastet:{cat:"aufgabe", t:"Aufgabenstellungen sprachlich entlasten: kurze Sätze, Beispiel zeigen, Schlüsselwörter markieren"},
+  s_spielerisch:    {cat:"aufgabe", gs:"Energie kanalisieren: spielerisches Format, z. B. Lernspiel oder kleiner Wettbewerb", t:"Energie kanalisieren: spielerisches Format oder Wettbewerbs-Element (z. B. Quiz)"},
+  s_anspruchsvoll_zuerst:{cat:"aufgabe", t:"Das Anspruchsvollste an den Stundenanfang legen, Routine ans Ende"},
+  s_erfolg_einstieg:{cat:"aufgabe", t:"Mit einer leichten Einstiegsaufgabe Erfolgserlebnisse ermöglichen"},
+  s_abgeschlossen:  {cat:"aufgabe", t:"Eine in sich geschlossene Aufgabe wählen – ohne Vorwissen aus den letzten Stunden lösbar"},
+
+  // Material & Medien
+  s_visual:         {cat:"material", t:"Visualisierung ergänzen: Bilder, Symbole, Ablaufplan an der Tafel"},
+  s_audio:          {cat:"material", t:"Audioversion bereitstellen: Text einsprechen oder Vorlesefunktion nutzen"},
+  s_wortspeicher:   {cat:"material", t:"Wortspeicher & Satzstarter sichtbar machen"},
+  s_textentlastung: {cat:"material", t:"Texte entlasten: kürzen, gliedern, größere Schrift und Zeilenabstand"},
+  s_tippkarten:     {cat:"material", t:"Tipp- und Hilfekarten bereitlegen"},
+  s_analog:         {cat:"material", t:"Analoge Alternative bereithalten, falls die Technik ausfällt"},
+  s_doku:           {cat:"material", t:"Ergebnisse festhalten (Foto, Padlet, Themenblatt), damit fehlende Kinder anschließen können"},
+  s_anschauung:     {cat:"material", gs:"Anschauungsmaterial einsetzen: legen, bauen, zeichnen", t:"Anschauungsmaterial und Darstellungswechsel einsetzen (zeichnen, legen, konkrete Modelle)"},
+
+  // Rhythmus & Bewegung
+  s_bewegung:       {cat:"rhythmus", gs:"Bewegungsphase nach ca. 15 Minuten (Bewegungslied, Zappelpause, Klatschspiel)", sek1:"Kurze Aktivierung nach ca. 20 Minuten (Stehphase, Platztausch, Murmelrunde im Stehen)", sek2:"Wechsel der Arbeitsform nach ca. 25 Minuten (Stehkreis, Galeriegang, Partnertausch)"},
+  s_timer:          {cat:"rhythmus", t:"Kurze Arbeitsphasen mit sichtbarem Timer (5–10 Minuten), dann Wechsel"},
+  s_aktiv_einstieg: {cat:"rhythmus", t:"Aktivierender Einstieg (Bewegung, Rätsel, Quiz) statt ruhigem Beginn"},
+  s_ruhig_ankommen: {cat:"rhythmus", gs:"Ruhiges Ankommensritual: Trinkpause, Kopf-runter-Minute, leise Musik", t:"Ruhige Ankommensphase: 5 Minuten Puffer, Trinkpause, stiller Arbeitsbeginn"},
+  s_methodenwechsel:{cat:"rhythmus", t:"Häufigere Methodenwechsel einplanen (etwa alle 10–15 Minuten)"},
+  s_puffer:         {cat:"rhythmus", t:"5 Minuten Puffer am Anfang einplanen – bewusst langsam starten"},
+
+  // Klima & Kommunikation
+  s_startritual:    {cat:"klima", t:"Klarer, ritualisierter Stundenstart: fester Ablauf, vereinbartes Stille-Signal"},
+  s_struktur_sichtbar:{cat:"klima", t:"Stundenablauf sichtbar machen: Was passiert wann? Das gibt Sicherheit"},
+  s_checkin_runde:  {cat:"klima", gs:"Kurze Erzählrunde / Stimmungsbarometer zum Einstieg (2–3 Minuten)", t:"Kurze Check-in-Runde: Wie geht's euch? (2–3 Minuten, ohne Zwang)"},
+  s_sensibel:       {cat:"klima", t:"Betroffene Kinder heute nicht „kalt“ aufrufen – sensibel und leise ansprechen"},
+  s_keine_blossstellung:{cat:"klima", t:"Keine unangekündigten Einzelpräsentationen – Wahlmöglichkeiten anbieten"},
+  s_fragenrunde:    {cat:"klima", t:"Zeit für offene Fragen einplanen – das nimmt Druck raus"},
+  s_muendlich:      {cat:"klima", t:"Arbeitsaufträge zusätzlich mündlich erklären und von Kindern wiederholen lassen"},
+  s_regeln_klar:    {cat:"klima", t:"Regeln & Erwartungen zu Beginn kurz und freundlich klären"},
+  s_rituale_erklaeren:{cat:"klima", t:"Rituale und Abläufe explizit erklären – nichts als bekannt voraussetzen"},
+
+  // Organisation
+  s_sitzordnung:    {cat:"orga", t:"Sitzordnung / Zusammensetzung heute bewusst steuern"},
+  s_zweite_person:  {cat:"orga", t:"Zweite Person gezielt einsetzen: Kleingruppe, Fördertisch oder Station übernehmen lassen"},
+  s_beobachtung:    {cat:"orga", t:"Der zweiten Person einen konkreten Beobachtungsauftrag geben (z. B. Beteiligung, Partnerarbeit)"},
+  s_rolle_klaeren:  {cat:"orga", t:"Vorab 2 Minuten klären: Wer macht was in dieser Stunde?"},
+  s_reize:          {cat:"orga", t:"Reize reduzieren: Tische frei räumen, Tür zu, klare Blickrichtung"},
+  s_rueckzug:       {cat:"orga", gs:"Rückzugsoption anbieten: ruhiger Arbeitsplatz, Kuschelecke, Kopfhörer", t:"Rückzugsoption anbieten: ruhiger Arbeitsplatz, ggf. Kopfhörer"},
+  s_technik_test:   {cat:"orga", t:"Technik vor der Stunde kurz testen – Plan B parat haben"},
+  s_gruppen_mischen:{cat:"orga", t:"Gruppen neu mischen – Lücken durch fehlende Kinder ausgleichen"},
+  s_pate:           {cat:"orga", gs:"Ein Patenkind / festen Partner für das neue Kind bestimmen", t:"Eine feste Ansprechperson / Pat*in für das neue Kind bestimmen"},
+};
+
+/* Regeln: Faktor → gewichtete Vorschläge */
+const RULES = {
+  unruhig:      [["s_partner",3],["s_geschlossen",3],["s_startritual",2],["s_bewegung",2],["s_timer",1],["s_sitzordnung",1]],
+  muede:        [["s_aktiv_einstieg",3],["s_bewegung",2],["s_methodenwechsel",2],["s_anspruchsvoll_zuerst",2]],
+  aufgedreht:   [["s_spielerisch",3],["s_bewegung",2],["s_timer",2],["s_partner",2],["s_regeln_klar",1]],
+  angespannt:   [["s_struktur_sichtbar",3],["s_fragenrunde",2],["s_erfolg_einstieg",2],["s_ruhig_ankommen",1],["s_kein_neustoff",1]],
+  konflikt:     [["s_sitzordnung",3],["s_checkin_runde",3],["s_rollen",2],["s_partner",2]],
+  motiviert:    [["s_wahl",3],["s_anspruchsvoll_zuerst",2],["s_spielerisch",1]],
+
+  krank:        [["s_kein_neustoff",3],["s_doku",2],["s_gruppen_mischen",2]],
+  schlaf:       [["s_erfolg_einstieg",2],["s_bewegung",2],["s_rueckzug",2],["s_sensibel",2]],
+  belastung:    [["s_sensibel",3],["s_keine_blossstellung",3],["s_struktur_sichtbar",1],["s_rueckzug",1]],
+  neu:          [["s_pate",3],["s_rituale_erklaeren",2],["s_checkin_runde",1]],
+
+  sprache:      [["s_visual",3],["s_wortspeicher",3],["s_sprachentlastet",3],["s_audio",2],["s_sprachvorbild",2],["s_muendlich",1]],
+  lesen:        [["s_audio",3],["s_textentlastung",3],["s_tandem_lesen",2],["s_visual",2],["s_muendlich",2]],
+  mathe:        [["s_anschauung",3],["s_gestuft",2],["s_tippkarten",2]],
+  konzentration:[["s_timer",3],["s_einzelschritte",3],["s_reize",2],["s_bewegung",2],["s_rueckzug",1]],
+  heterogen:    [["s_gestuft",3],["s_tippkarten",2],["s_helfer",2]],
+
+  praktikantin: [["s_zweite_person",3],["s_rolle_klaeren",2],["s_beobachtung",2]],
+  vertretung:   [["s_abgeschlossen",3],["s_regeln_klar",2],["s_partner",1]],
+  randstunde:   [["s_startritual",2],["s_bewegung",2],["s_kernziel",1]],
+  nachsport:    [["s_ruhig_ankommen",3],["s_puffer",2]],
+  technik:      [["s_analog",3],["s_technik_test",2]],
+  kurz:         [["s_kernziel",3],["s_partner",2],["s_geschlossen",1]],
+
+  p_gruppe:     [["s_rollen",2]],
+  p_neu:        [["s_neustoff_strukturiert",1]],
+  p_test:       [["s_struktur_sichtbar",1],["s_fragenrunde",1]],
+};
+
+/* Kombinationen verstärken bestimmte Vorschläge */
+const COMBOS = [
+  {all:["unruhig","p_gruppe"],   add:[["s_partner",3],["s_rollen",2]]},
+  {all:["konflikt","p_gruppe"],  add:[["s_sitzordnung",2],["s_rollen",2]]},
+  {all:["kurz","p_gruppe"],      add:[["s_partner",2]]},
+  {all:["krank","p_neu"],        add:[["s_kein_neustoff",3]]},
+  {all:["muede","p_neu"],        add:[["s_neustoff_strukturiert",2]]},
+  {all:["unruhig","p_neu"],      add:[["s_neustoff_strukturiert",2]]},
+  {all:["unruhig","schlaf"],     add:[["s_bewegung",2]]},
+  {all:["angespannt","p_test"],  add:[["s_fragenrunde",2],["s_erfolg_einstieg",1]]},
+  {all:["sprache","lesen"],      add:[["s_audio",2],["s_visual",1]]},
+];
+
+/* Widersprüchliche Paare: der schwächere fliegt raus */
+const EXCLUSIVE = [
+  ["s_aktiv_einstieg","s_ruhig_ankommen"],
+  ["s_wahl","s_geschlossen"],
+  ["s_kein_neustoff","s_neustoff_strukturiert"],
+];
+
+/* ================================================================
+   State & Storage
+   ================================================================ */
+const LS = "stundencheck_v1";
+let state = load();
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(LS)) || {};
+    return { grade: s.grade||3, custom: s.custom||[], history: s.history||[], apiKey: s.apiKey||"" };
+  }catch(e){ return {grade:3, custom:[], history:[], apiKey:""}; }
+}
+function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+
+let selected = new Set();       // Faktor-IDs (custom: "c:<index>")
+let lastResult = null;          // {items, hiddenItems, aiItems, checked:Set}
+let showAll = false;
+
+/* ================================================================
+   Helpers
+   ================================================================ */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800); }
+function band(){ return state.grade<=4 ? "gs" : state.grade<=10 ? "sek1" : "sek2"; }
+function bandLabel(){ return state.grade<=4?"Grundschule":state.grade<=10?"Sekundarstufe I":"Sekundarstufe II"; }
+function suggText(id){
+  const s = SUGG[id]; if(!s) return "";
+  const b = band();
+  if(b==="gs")   return s.gs   ?? s.t ?? s.sek1 ?? "";
+  if(b==="sek1") return s.sek1 ?? s.t ?? "";
+  return s.sek2 ?? s.sek1 ?? s.t ?? "";
+}
+function factorLabel(id){
+  if(id.startsWith("c:")){ const c = state.custom[+id.slice(2)]; return c ? c.label : "Eigener Faktor"; }
+  const f = FACTORS.find(f=>f.id===id); return f ? f.l : id;
+}
+
+/* ================================================================
+   Views
+   ================================================================ */
+function show(view){
+  ["checkin","results","history","settings"].forEach(v=>{ $("view-"+v).hidden = v!==view; });
+  $("bottombar").hidden = view!=="checkin";
+  if(view==="history") renderHistory();
+  if(view==="settings") renderSettings();
+  window.scrollTo(0,0);
+}
+
+/* ---------- Check-in ---------- */
+function renderFactors(){
+  const area = $("factorArea");
+  let html = "";
+  for(const [cid, clabel] of CATS){
+    let chips = "";
+    if(cid==="eigene"){
+      state.custom.forEach((c,i)=>{
+        const id = "c:"+i;
+        chips += `<button class="chip custom" aria-pressed="${selected.has(id)}" onclick="toggleFactor('${id}',this)"><span class="e">⭐</span>${esc(c.label)}</button>`;
+      });
+      if(!state.custom.length) continue;
+    } else {
+      for(const f of FACTORS.filter(f=>f.cat===cid)){
+        chips += `<button class="chip" aria-pressed="${selected.has(f.id)}" onclick="toggleFactor('${f.id}',this)"><span class="e">${f.e}</span>${esc(f.l)}</button>`;
+      }
+    }
+    html += `<div class="catlabel">${clabel}</div><div class="chips">${chips}</div>`;
+  }
+  area.innerHTML = html;
+  updateCount();
+}
+function toggleFactor(id, btn){
+  if(selected.has(id)) selected.delete(id); else selected.add(id);
+  btn.setAttribute("aria-pressed", selected.has(id));
+  updateCount();
+}
+function updateCount(){
+  const n = selected.size;
+  $("selCount").textContent = n + " ausgewählt";
+  $("goBtn").disabled = n===0;
+}
+function resetCheckin(){
+  selected.clear(); lastResult=null; showAll=false;
+  renderFactors(); show("checkin");
+}
+
+/* ---------- Engine ---------- */
+function computeSuggestions(){
+  const score = {}, why = {};
+  const bump = (sid, w, from)=>{
+    score[sid] = (score[sid]||0)+w;
+    (why[sid] = why[sid]||new Set()).add(from);
+  };
+  for(const fid of selected){
+    if(fid.startsWith("c:")) continue;
+    for(const [sid,w] of (RULES[fid]||[])) bump(sid, w, factorLabel(fid));
+  }
+  for(const combo of COMBOS){
+    if(combo.all.every(f=>selected.has(f))){
+      const from = combo.all.map(factorLabel).join(" + ");
+      for(const [sid,w] of combo.add) bump(sid, w, from);
+    }
+  }
+  // Widersprüche auflösen
+  for(const [a,b] of EXCLUSIVE){
+    if(score[a] && score[b]){
+      if(score[a] >= score[b]) delete score[b]; else delete score[a];
+    }
+  }
+  let items = Object.keys(score).map(sid=>({
+    sid, score:score[sid], cat:SUGG[sid].cat, text:suggText(sid),
+    why:[...why[sid]],
+  })).sort((a,b)=>b.score-a.score);
+
+  // Eigene Faktoren → eigene Vorschläge
+  for(const fid of selected){
+    if(!fid.startsWith("c:")) continue;
+    const c = state.custom[+fid.slice(2)];
+    if(c && c.sugg && c.sugg.length){
+      c.sugg.forEach((t,j)=>items.push({sid:fid+":"+j, score:99, cat:"eigene", text:t, why:[c.label]}));
+    }
+  }
+  return items;
+}
+
+function generate(){
+  if(!selected.size) return;
+  const all = computeSuggestions();
+  const own = all.filter(i=>i.cat==="eigene");
+  const rest = all.filter(i=>i.cat!=="eigene");
+  const MAX = 8;
+  // Garantie: Jeder angetippte Faktor ist mit seinem besten Vorschlag vertreten
+  const chosen = new Map();
+  for(const fid of selected){
+    if(fid.startsWith("c:")) continue;
+    const lbl = factorLabel(fid);
+    const best = rest.find(i=>i.why.some(w=>w.split(" + ").includes(lbl)));
+    if(best) chosen.set(best.sid, best);
+  }
+  for(const it of rest){
+    if(chosen.size >= MAX) break;
+    if(!chosen.has(it.sid)) chosen.set(it.sid, it);
+  }
+  const main = [...chosen.values()].sort((a,b)=>b.score-a.score).concat(own);
+  const more = rest.filter(i=>!chosen.has(i.sid));
+  lastResult = { items: main, hiddenItems: more, aiItems: [], checked: new Set(),
+                 factors: [...selected].map(factorLabel), ts: Date.now() };
+  showAll = false;
+  renderResults();
+  saveToHistory();
+  show("results");
+}
+
+function renderResults(){
+  const r = lastResult; if(!r) return;
+  $("resSummary").innerHTML = `<b>Heute:</b> ${r.factors.map(esc).join(" · ")} &nbsp;·&nbsp; Kl. ${state.grade} (${bandLabel()})`;
+  const list = showAll ? r.items.concat(r.hiddenItems) : r.items;
+  // gruppieren nach Kategorie in SCATS-Reihenfolge
+  let html = "";
+  for(const [cid,clabel] of SCATS){
+    const group = list.filter(i=>i.cat===cid);
+    if(!group.length) continue;
+    html += `<div class="rescat"><span class="dot"${cid==="eigene"?' style="background:var(--amber)"':''}></span><h3>${clabel}</h3></div>`;
+    for(const it of group){
+      const ck = r.checked.has(it.sid) ? " checked":"";
+      html += `<div class="card${ck}" onclick="toggleCard('${it.sid}',this)">
+        <div class="t">${esc(it.text)}</div>
+        <div class="why">weil: <b>${it.why.map(esc).join("</b>, <b>")}</b></div>
+      </div>`;
+    }
+  }
+  $("resArea").innerHTML = html;
+  const mb = $("moreBtn");
+  mb.hidden = !r.hiddenItems.length;
+  mb.textContent = showAll ? "Weniger anzeigen" : `Weitere ${r.hiddenItems.length} Vorschläge anzeigen`;
+  renderAI();
+}
+function toggleMore(){ showAll = !showAll; renderResults(); }
+function toggleCard(sid, el){
+  const r = lastResult; if(!r) return;
+  if(r.checked.has(sid)) r.checked.delete(sid); else r.checked.add(sid);
+  el.classList.toggle("checked");
+  updateHistoryEntry();
+}
+
+/* ---------- Verlauf ---------- */
+function saveToHistory(){
+  const r = lastResult;
+  const entry = {
+    ts: r.ts, grade: state.grade, factors: r.factors,
+    suggestions: r.items.map(i=>i.text),
+    picked: [],
+  };
+  state.history.unshift(entry);
+  state.history = state.history.slice(0,60);
+  save();
+}
+function updateHistoryEntry(){
+  const r = lastResult; if(!r) return;
+  const entry = state.history.find(h=>h.ts===r.ts);
+  if(entry){
+    const all = r.items.concat(r.hiddenItems, r.aiItems);
+    entry.picked = all.filter(i=>r.checked.has(i.sid)).map(i=>i.text);
+    save();
+  }
+}
+function renderHistory(){
+  const area = $("histArea");
+  if(!state.history.length){ area.innerHTML = '<p class="note">Noch keine Checks gespeichert.</p>'; return; }
+  area.innerHTML = state.history.map(h=>{
+    const d = new Date(h.ts);
+    const ds = d.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit",year:"2-digit"}) + ", " +
+               d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}) + " Uhr · Kl. " + h.grade;
+    const picked = h.picked && h.picked.length
+      ? `<div class="fx" style="color:var(--accent-ink)">✓ ${h.picked.map(esc).join(" · ")}</div>` : "";
+    return `<div class="histitem">
+      <div class="d">${ds}</div>
+      <div class="fx">${h.factors.map(esc).join(" · ")}</div>
+      ${picked}
+      <details><summary>Alle Vorschläge (${h.suggestions.length})</summary>
+        <ul>${h.suggestions.map(s=>`<li>${esc(s)}</li>`).join("")}</ul>
+      </details>
+    </div>`;
+  }).join("");
+}
+function clearHistory(){
+  if(!confirm("Verlauf wirklich löschen?")) return;
+  state.history = []; save(); renderHistory(); toast("Verlauf gelöscht");
+}
+
+/* ---------- Kopieren / Export ---------- */
+function copyResults(){
+  const r = lastResult; if(!r) return;
+  const d = new Date(r.ts).toLocaleDateString("de-DE");
+  const all = r.items.concat(showAll?r.hiddenItems:[], r.aiItems);
+  let txt = `StundenCheck ${d} · Kl. ${state.grade}\nHeute: ${r.factors.join(", ")}\n\nAnpassungen:\n`;
+  txt += all.map(i=>`• ${i.text}${r.checked.has(i.sid)?" ✓":""}`).join("\n");
+  navigator.clipboard.writeText(txt).then(()=>toast("Kopiert 📋"), ()=>toast("Kopieren nicht möglich"));
+}
+function exportData(){
+  const data = {...state}; delete data.apiKey;
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "stundencheck-export.json";
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function wipeAll(){
+  if(!confirm("Wirklich ALLE Daten (Verlauf, eigene Faktoren, API-Key) löschen?")) return;
+  localStorage.removeItem(LS);
+  state = load(); selected.clear(); lastResult=null;
+  renderFactors(); renderSettings(); toast("Alles gelöscht");
+}
+
+/* ---------- Einstellungen ---------- */
+function renderSettings(){
+  $("gradeRange").value = state.grade;
+  $("gradeVal").textContent = state.grade;
+  $("gradeBandHint").textContent = "Stufe: " + bandLabel() + " – Formulierungen und Zeitangaben passen sich an.";
+  $("apiKey").value = state.apiKey ? "••••••••••••" : "";
+  renderCustomList();
+}
+function setGrade(v){
+  state.grade = +v; save();
+  $("gradeVal").textContent = v;
+  $("gradeBandHint").textContent = "Stufe: " + bandLabel() + " – Formulierungen und Zeitangaben passen sich an.";
+  $("gradePill").textContent = "Kl. " + v;
+}
+function renderCustomList(){
+  const el = $("customList");
+  el.innerHTML = state.custom.map((c,i)=>
+    `<div class="customitem">⭐ <span>${esc(c.label)}${c.sugg.length?` <span class="note">(${c.sugg.length} Vorschläge)</span>`:""}</span>
+     <button class="x" onclick="removeCustomFactor(${i})" title="Löschen">✕</button></div>`
+  ).join("") || '<p class="note">Noch keine eigenen Faktoren.</p>';
+}
+function addCustomFactor(){
+  const label = $("cfLabel").value.trim();
+  if(!label){ toast("Bitte eine Bezeichnung eingeben"); return; }
+  const sugg = $("cfSugg").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  state.custom.push({label, sugg}); save();
+  $("cfLabel").value=""; $("cfSugg").value="";
+  renderCustomList(); renderFactors(); toast("Faktor hinzugefügt");
+}
+function removeCustomFactor(i){
+  // Auswahl bereinigen (Indizes verschieben sich)
+  selected = new Set([...selected].filter(id=>!id.startsWith("c:")));
+  state.custom.splice(i,1); save();
+  renderCustomList(); renderFactors();
+}
+function saveKey(){
+  const v = $("apiKey").value.trim();
+  if(v && !v.includes("•")){ state.apiKey = v; save(); toast("Key gespeichert (nur lokal)"); }
+  $("apiKey").value = state.apiKey ? "••••••••••••" : "";
+}
+function deleteKey(){ state.apiKey=""; save(); $("apiKey").value=""; toast("Key gelöscht"); }
+
+/* ---------- KI-Verfeinerung (optional, Anthropic API) ---------- */
+function renderAI(){
+  const r = lastResult;
+  $("aiHead").hidden = !(r && r.aiItems.length);
+  $("aiArea").innerHTML = (r?r.aiItems:[]).map(it=>{
+    const ck = r.checked.has(it.sid) ? " checked":"";
+    return `<div class="card ai${ck}" onclick="toggleCard('${it.sid}',this)">
+      <div class="t">${esc(it.text)}</div>
+      <div class="why">${esc(it.hint||"")}</div>
+    </div>`;
+  }).join("");
+  $("aiNote").innerHTML = state.apiKey
+    ? "Optional: Claude schneidet die Vorschläge auf deine Kombination zu. Es werden nur die angetippten Faktoren gesendet – keine Namen, keine Personendaten."
+    : 'Für die KI-Verfeinerung brauchst du einen eigenen Anthropic-API-Key → <a href="#" onclick="show(\'settings\');return false">Einstellungen</a>. Die App funktioniert auch komplett ohne.';
+  $("aiBtn").disabled = !state.apiKey;
+}
+
+async function aiRefine(){
+  const r = lastResult;
+  if(!r || !state.apiKey) return;
+  const btn = $("aiBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Claude denkt nach …';
+  try{
+    const prompt =
+`Du unterstützt eine Lehrkraft bei der adaptiven Unterrichtsplanung (KEINE Diagnostik).
+Kontext: Klassenstufe ${state.grade} (${bandLabel()}), Deutschland.
+Heutige Situation (von der Lehrkraft angetippt): ${r.factors.join(", ")}.
+
+Eine regelbasierte App hat bereits diese Anpassungen vorgeschlagen:
+${r.items.map(i=>"- "+i.text).join("\n")}
+
+Ergänze 3 bis 5 WEITERE, konkrete und sofort umsetzbare Unterrichtsanpassungen für genau diese Kombination, die oben noch nicht vorkommen. Keine Diagnosen, keine Etikettierungen von Kindern, keine Allgemeinplätze. Kurz, praktisch, auf Deutsch, passend zur Klassenstufe.`;
+
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key": state.apiKey,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true",
+      },
+      body: JSON.stringify({
+        model:"claude-opus-4-8",
+        max_tokens: 1500,
+        output_config:{ format:{ type:"json_schema", schema:{
+          type:"object",
+          properties:{ vorschlaege:{ type:"array", items:{
+            type:"object",
+            properties:{ titel:{type:"string"}, hinweis:{type:"string"} },
+            required:["titel","hinweis"], additionalProperties:false
+          }}},
+          required:["vorschlaege"], additionalProperties:false
+        }}},
+        messages:[{role:"user", content: prompt}],
+      }),
+    });
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err?.error?.message || ("HTTP "+res.status));
+    }
+    const data = await res.json();
+    if(data.stop_reason === "refusal") throw new Error("Anfrage wurde abgelehnt – bitte anders formulieren.");
+    const textBlock = (data.content||[]).find(b=>b.type==="text");
+    const parsed = JSON.parse(textBlock.text);
+    r.aiItems = (parsed.vorschlaege||[]).map((v,i)=>({
+      sid:"ai:"+r.ts+":"+i, cat:"ki", text:v.titel, hint:v.hinweis, why:["KI"],
+    }));
+    renderAI();
+    toast("KI-Vorschläge ergänzt ✨");
+  }catch(e){
+    console.error(e);
+    toast("KI-Fehler: " + (e.message||"unbekannt"));
+  }finally{
+    btn.disabled = !state.apiKey;
+    btn.innerHTML = "✨ Mit KI verfeinern";
+  }
+}
+
+/* ---------- Init ---------- */
+$("gradePill").textContent = "Kl. " + state.grade;
+renderFactors();
+</script>
+</body>
+</html>
