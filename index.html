@@ -70,8 +70,10 @@ button.chip:active{transform:scale(.96)}
 button.chip[aria-pressed="true"]{
   background:var(--accent); color:#fff; font-weight:600;
 }
-button.chip .e{margin-right:6px}
+button.chip .e{display:inline-flex; vertical-align:-3px; margin-right:7px; color:var(--ink2)}
+button.chip[aria-pressed="true"] .e{color:#fff}
 button.chip.custom[aria-pressed="true"]{background:var(--amber)}
+.iconbtn svg{display:block}
 
 .bottombar{
   position:fixed; left:0; right:0; bottom:0; z-index:30;
@@ -162,8 +164,8 @@ input[type=range]{width:100%; accent-color:var(--accent)}
   <header class="app">
     <div class="brand" onclick="show('checkin')">StundenCheck<small>adaptive Unterrichtsplanung · keine Diagnostik</small></div>
     <button class="pill accent" id="gradePill" onclick="show('settings')" title="Klassenstufe ändern">Kl. 3</button>
-    <button class="iconbtn" onclick="show('history')" title="Verlauf" aria-label="Verlauf">🕘</button>
-    <button class="iconbtn" onclick="show('settings')" title="Einstellungen" aria-label="Einstellungen">⚙️</button>
+    <button class="iconbtn" onclick="show('history')" title="Verlauf" aria-label="Verlauf"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.7 8.2A8.5 8.5 0 1 1 3.5 12"/><path d="M3.5 4.5v4h4"/><path d="M12 8v4.3l3.2 1.9"/></svg></button>
+    <button class="iconbtn" onclick="show('settings')" title="Einstellungen" aria-label="Einstellungen"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </header>
 
   <!-- ============ CHECK-IN ============ -->
@@ -187,14 +189,14 @@ input[type=range]{width:100%; accent-color:var(--accent)}
       <div class="rescat" id="aiHead" hidden><span class="dot" style="background:var(--amber)"></span><h3>KI-Vorschläge</h3></div>
       <div id="aiArea"></div>
       <div class="actionrow">
-        <button class="secondary" id="aiBtn" onclick="aiRefine()">✨ Mit KI verfeinern</button>
+        <button class="secondary" id="aiBtn" onclick="aiRefine()">Mit KI verfeinern</button>
       </div>
       <p class="note" id="aiNote"></p>
     </div>
 
     <div class="actionrow">
-      <button class="secondary" onclick="copyResults()">📋 Kopieren</button>
-      <button class="secondary" onclick="resetCheckin()">↺ Neuer Check</button>
+      <button class="secondary" onclick="copyResults()">Kopieren</button>
+      <button class="secondary" onclick="resetCheckin()">Neuer Check</button>
     </div>
   </main>
 
@@ -205,7 +207,7 @@ input[type=range]{width:100%; accent-color:var(--accent)}
     <p class="sub">Deine letzten Checks – nur auf diesem Gerät gespeichert.</p>
     <section class="panel"><div id="histArea"></div></section>
     <div class="actionrow">
-      <button class="secondary" onclick="exportData()">⬇️ Daten exportieren (JSON)</button>
+      <button class="secondary" onclick="exportData()">Daten exportieren (JSON)</button>
       <button class="secondary" onclick="clearHistory()" style="color:var(--danger)">Verlauf löschen</button>
     </div>
   </main>
@@ -254,7 +256,7 @@ input[type=range]{width:100%; accent-color:var(--accent)}
       <h3>Daten</h3>
       <p class="note">Alles liegt ausschließlich im Speicher deines Browsers (localStorage). Kein Konto, kein Server, kein Tracking.</p>
       <div class="actionrow" style="margin-bottom:0">
-        <button class="secondary" onclick="exportData()">⬇️ Exportieren</button>
+        <button class="secondary" onclick="exportData()">Exportieren</button>
         <button class="secondary" onclick="wipeAll()" style="color:var(--danger)">Alles löschen</button>
       </div>
     </section>
@@ -292,35 +294,67 @@ const CATS = [
 ];
 
 const FACTORS = [
-  {id:"unruhig",       cat:"klasse", e:"🌀", l:"Sehr unruhig"},
-  {id:"muede",         cat:"klasse", e:"🥱", l:"Müde & schlapp"},
-  {id:"aufgedreht",    cat:"klasse", e:"🎉", l:"Aufgedreht (z. B. vor Ferien)"},
-  {id:"angespannt",    cat:"klasse", e:"😟", l:"Angespannt / nervös"},
-  {id:"konflikt",      cat:"klasse", e:"⚡", l:"Konflikt in der Klasse"},
-  {id:"motiviert",     cat:"klasse", e:"🚀", l:"Richtig motiviert"},
+  {id:"unruhig",       cat:"klasse", e:"waves",    l:"Sehr unruhig"},
+  {id:"muede",         cat:"klasse", e:"battery",  l:"Müde & schlapp"},
+  {id:"aufgedreht",    cat:"klasse", e:"burst",    l:"Aufgedreht (z. B. vor Ferien)"},
+  {id:"angespannt",    cat:"klasse", e:"alert",    l:"Angespannt / nervös"},
+  {id:"konflikt",      cat:"klasse", e:"bolt",     l:"Konflikt in der Klasse"},
+  {id:"motiviert",     cat:"klasse", e:"trend",    l:"Richtig motiviert"},
 
-  {id:"krank",         cat:"kinder", e:"🤒", l:"Mehrere Kinder krank / fehlen"},
-  {id:"schlaf",        cat:"kinder", e:"😴", l:"Kinder mit wenig Schlaf"},
-  {id:"belastung",     cat:"kinder", e:"💙", l:"Kind mit akuter Belastung"},
-  {id:"neu",           cat:"kinder", e:"👋", l:"Neues Kind in der Klasse"},
+  {id:"krank",         cat:"kinder", e:"med",      l:"Mehrere Kinder krank / fehlen"},
+  {id:"schlaf",        cat:"kinder", e:"moon",     l:"Kinder mit wenig Schlaf"},
+  {id:"belastung",     cat:"kinder", e:"heart",    l:"Kind mit akuter Belastung"},
+  {id:"neu",           cat:"kinder", e:"userplus", l:"Neues Kind in der Klasse"},
 
-  {id:"sprache",       cat:"lernen", e:"🗣️", l:"Sprachbarrieren"},
-  {id:"lesen",         cat:"lernen", e:"📖", l:"Förderbedarf Lesen"},
-  {id:"mathe",         cat:"lernen", e:"🔢", l:"Förderbedarf Mathe"},
-  {id:"konzentration", cat:"lernen", e:"🎯", l:"Konzentration schwierig"},
-  {id:"heterogen",     cat:"lernen", e:"🌈", l:"Sehr unterschiedliches Niveau"},
+  {id:"sprache",       cat:"lernen", e:"speech",   l:"Sprachbarrieren"},
+  {id:"lesen",         cat:"lernen", e:"book",     l:"Förderbedarf Lesen"},
+  {id:"mathe",         cat:"lernen", e:"hash",     l:"Förderbedarf Mathe"},
+  {id:"konzentration", cat:"lernen", e:"target",   l:"Konzentration schwierig"},
+  {id:"heterogen",     cat:"lernen", e:"layers",   l:"Sehr unterschiedliches Niveau"},
 
-  {id:"praktikantin",  cat:"rahmen", e:"🧑‍🏫", l:"Praktikant*in / 2. Person dabei"},
-  {id:"vertretung",    cat:"rahmen", e:"🔄", l:"Vertretungsstunde"},
-  {id:"randstunde",    cat:"rahmen", e:"🕐", l:"Erste / letzte Stunde"},
-  {id:"nachsport",     cat:"rahmen", e:"⚽", l:"Direkt nach Sport / Pause"},
-  {id:"technik",       cat:"rahmen", e:"📵", l:"Technik unsicher"},
-  {id:"kurz",          cat:"rahmen", e:"⏳", l:"Verkürzte Stunde / Zeitdruck"},
+  {id:"praktikantin",  cat:"rahmen", e:"users",    l:"Praktikant*in / 2. Person dabei"},
+  {id:"vertretung",    cat:"rahmen", e:"refresh",  l:"Vertretungsstunde"},
+  {id:"randstunde",    cat:"rahmen", e:"clock",    l:"Erste / letzte Stunde"},
+  {id:"nachsport",     cat:"rahmen", e:"ball",     l:"Direkt nach Sport / Pause"},
+  {id:"technik",       cat:"rahmen", e:"monitor",  l:"Technik unsicher"},
+  {id:"kurz",          cat:"rahmen", e:"hourglass",l:"Verkürzte Stunde / Zeitdruck"},
 
-  {id:"p_gruppe",      cat:"plan", e:"👥", l:"Gruppenarbeit geplant"},
-  {id:"p_neu",         cat:"plan", e:"✨", l:"Neuer Stoff geplant"},
-  {id:"p_test",        cat:"plan", e:"📝", l:"Test / Abfrage geplant"},
+  {id:"p_gruppe",      cat:"plan", e:"group",      l:"Gruppenarbeit geplant"},
+  {id:"p_neu",         cat:"plan", e:"sparkle",    l:"Neuer Stoff geplant"},
+  {id:"p_test",        cat:"plan", e:"clipboard",  l:"Test / Abfrage geplant"},
 ];
+
+/* Einfarbige Linien-Icons (erben currentColor) */
+const ICO = {
+  waves:    '<path d="M3 8.5c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+  battery:  '<rect x="2.5" y="8.5" width="15" height="7" rx="2"/><path d="M20.5 10.5v3M6 11.2v1.6"/>',
+  burst:    '<path d="M12 3.5v4M12 16.5v4M3.5 12h4M16.5 12h4M6 6l2.8 2.8M15.2 15.2L18 18M18 6l-2.8 2.8M8.8 15.2L6 18"/>',
+  alert:    '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V13M12 16.4h.01"/>',
+  bolt:     '<path d="M13 3 5.5 13.5H11L9.8 21l7.7-10.5H12L13 3z"/>',
+  trend:    '<path d="M3.5 17.5l6-6 4 4 7-8"/><path d="M15.5 7.5h5v5"/>',
+  med:      '<circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/>',
+  moon:     '<path d="M20 13.7A8 8 0 1 1 10.3 4 6.6 6.6 0 0 0 20 13.7z"/>',
+  heart:    '<path d="M12 20S4.5 15.3 3.2 10.6a4.8 4.8 0 0 1 8.8-3.4A4.8 4.8 0 0 1 20.8 10.6C19.5 15.3 12 20 12 20z"/>',
+  userplus: '<circle cx="9.5" cy="8" r="3.3"/><path d="M3.5 20c0-3.4 2.6-5.4 6-5.4s6 2 6 5.4M19 7.5V13M16.2 10.2h5.6"/>',
+  speech:   '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H9.5L4 20V6.5z"/>',
+  book:     '<path d="M12 6.2C10 4.8 7.5 4.3 4 4.3v13.5c3.5 0 6 .5 8 1.9 2-1.4 4.5-1.9 8-1.9V4.3c-3.5 0-6 .5-8 1.9zM12 6.2v13.5"/>',
+  hash:     '<path d="M9.5 4 7.5 20M16.5 4l-2 16M4.5 9h16M3.5 15h16"/>',
+  target:   '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r=".8" fill="currentColor"/>',
+  layers:   '<path d="M12 3.8 20 8.3l-8 4.5-8-4.5 8-4.5z"/><path d="M4 13.6l8 4.6 8-4.6"/>',
+  users:    '<circle cx="9" cy="8.3" r="3.3"/><path d="M3 20c0-3.4 2.6-5.4 6-5.4s6 2 6 5.4M15.8 5.3a3.3 3.3 0 0 1 0 6M17.3 14.9c2.2.8 3.7 2.5 3.7 5.1"/>',
+  refresh:  '<path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5M4 20v-4.5h4.5"/>',
+  clock:    '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.4 2"/>',
+  ball:     '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c3 3.2 3 13.8 0 17M3.8 9.3c4 2.4 12.4 2.4 16.4 0M3.8 14.7c4-2.4 12.4-2.4 16.4 0"/>',
+  monitor:  '<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M9 21h6M12 17.2V21M5.5 3.5l14 16"/>',
+  hourglass:'<path d="M7 3.5h10M7 20.5h10M8 3.5v2.2L12 10l4-4.3V3.5M8 20.5v-2.2L12 14l4 4.3v2.2"/>',
+  group:    '<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2.8 19.5c0-3 2.3-4.8 5.2-4.8 1.7 0 3.1.6 4 1.6.9-1 2.3-1.6 4-1.6 2.9 0 5.2 1.8 5.2 4.8"/>',
+  sparkle:  '<path d="M12 3.8l1.9 5.4 5.4 1.9-5.4 1.9L12 18.4l-1.9-5.4-5.4-1.9 5.4-1.9L12 3.8z"/>',
+  clipboard:'<rect x="5" y="4.5" width="14" height="16" rx="2"/><path d="M9 3.2h6v3H9zM9 11.5h6M9 15.5h4"/>',
+  star:     '<path d="M12 4l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.3l-4.8 2.6.9-5.4-3.9-3.8 5.4-.8L12 4z"/>',
+};
+function icon(n, s){
+  return `<svg viewBox="0 0 24 24" width="${s||17}" height="${s||17}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[n]||""}</svg>`;
+}
 
 const SCATS = [
   ["sozial","Sozialform"],
@@ -506,12 +540,12 @@ function renderFactors(){
     if(cid==="eigene"){
       state.custom.forEach((c,i)=>{
         const id = "c:"+i;
-        chips += `<button class="chip custom" aria-pressed="${selected.has(id)}" onclick="toggleFactor('${id}',this)"><span class="e">⭐</span>${esc(c.label)}</button>`;
+        chips += `<button class="chip custom" aria-pressed="${selected.has(id)}" onclick="toggleFactor('${id}',this)"><span class="e">${icon("star")}</span>${esc(c.label)}</button>`;
       });
       if(!state.custom.length) continue;
     } else {
       for(const f of FACTORS.filter(f=>f.cat===cid)){
-        chips += `<button class="chip" aria-pressed="${selected.has(f.id)}" onclick="toggleFactor('${f.id}',this)"><span class="e">${f.e}</span>${esc(f.l)}</button>`;
+        chips += `<button class="chip" aria-pressed="${selected.has(f.id)}" onclick="toggleFactor('${f.id}',this)"><span class="e">${icon(f.e)}</span>${esc(f.l)}</button>`;
       }
     }
     html += `<div class="catlabel">${clabel}</div><div class="chips">${chips}</div>`;
@@ -685,7 +719,7 @@ function copyResults(){
   const all = r.items.concat(showAll?r.hiddenItems:[], r.aiItems);
   let txt = `StundenCheck ${d} · Kl. ${state.grade}\nHeute: ${r.factors.join(", ")}\n\nAnpassungen:\n`;
   txt += all.map(i=>`• ${i.text}${r.checked.has(i.sid)?" ✓":""}`).join("\n");
-  navigator.clipboard.writeText(txt).then(()=>toast("Kopiert 📋"), ()=>toast("Kopieren nicht möglich"));
+  navigator.clipboard.writeText(txt).then(()=>toast("Kopiert"), ()=>toast("Kopieren nicht möglich"));
 }
 function exportData(){
   const data = {...state}; delete data.apiKey;
@@ -719,7 +753,7 @@ function setGrade(v){
 function renderCustomList(){
   const el = $("customList");
   el.innerHTML = state.custom.map((c,i)=>
-    `<div class="customitem">⭐ <span>${esc(c.label)}${c.sugg.length?` <span class="note">(${c.sugg.length} Vorschläge)</span>`:""}</span>
+    `<div class="customitem"><span class="e">${icon("star",16)}</span> <span>${esc(c.label)}${c.sugg.length?` <span class="note">(${c.sugg.length} Vorschläge)</span>`:""}</span>
      <button class="x" onclick="removeCustomFactor(${i})" title="Löschen">✕</button></div>`
   ).join("") || '<p class="note">Noch keine eigenen Faktoren.</p>';
 }
@@ -813,13 +847,13 @@ Ergänze 3 bis 5 WEITERE, konkrete und sofort umsetzbare Unterrichtsanpassungen 
       sid:"ai:"+r.ts+":"+i, cat:"ki", text:v.titel, hint:v.hinweis, why:["KI"],
     }));
     renderAI();
-    toast("KI-Vorschläge ergänzt ✨");
+    toast("KI-Vorschläge ergänzt");
   }catch(e){
     console.error(e);
     toast("KI-Fehler: " + (e.message||"unbekannt"));
   }finally{
     btn.disabled = !state.apiKey;
-    btn.innerHTML = "✨ Mit KI verfeinern";
+    btn.innerHTML = "Mit KI verfeinern";
   }
 }
 
